@@ -1,4 +1,7 @@
 export const addTodo = (req, res, next) => {
+    // validate user input
+    // Write todo to database
+    // Respond to request
     res.json('Todo was added!');
 }
 
