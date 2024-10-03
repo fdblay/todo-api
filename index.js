@@ -5,10 +5,13 @@ import todoRouter from './routes/todo.js';
 import userRouter from './routes/user.js';
 
 // connect to database
-await mongoose.connect('mongodb+srv://todo-api:todo-api@cluster0.q3qas.mongodb.net/todo-db?retryWrites=true&w=majority&appName=Cluster0');
+await mongoose.connect(process.env.MONGO_URI);
 
 // create an express app
 const app = express();
+
+// use middlewares
+app.use(express.json());
 
 //  Use routes
 app.use(todoRouter);
