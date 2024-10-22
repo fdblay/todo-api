@@ -1,7 +1,8 @@
 import { UserModel } from "../models/user.js";
 import { registerUserValidator, loginUserValidator, updateProfileValidator } from "../validators/user.js";
-import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
+import bcryptjs from "bcryptjs";
+import { mailTransporter } from "../utils/mail.js";
 
 // Register ('user registered')
 // Login ('user logged in')
@@ -31,6 +32,11 @@ export const userRegister = async (req, res, next) => {
             password: hashedPassword
         });
         // Send user confirmation email
+        await mailTransporter.sendMail({
+            to: value.email,
+            subject: 'User Registeration',
+            text: `${value.name} your account has been registered successfully`
+        });
         // Respond to request
         res.json('User Registered!');
     } catch (error) {
@@ -77,8 +83,8 @@ export const getProfile = async (req, res, next) => {
     try {
         // Find authenticated user from the database
         const user = await UserModel
-        .findById(req.auth.id)
-        .select({password: false});
+            .findById(req.auth.id)
+            .select({ password: false });
         // Respond to request
         res.json(user);
     } catch (error) {
@@ -90,12 +96,22 @@ export const userLogout = (req, res, next) => {
     res.json('user Logged out');
 }
 
-export const updateUserProfile = (req, res, next) => {
+export const updateUserProfile = async (req, res, next) => {
     try {
         // validate user input
-        const {} = updateProfileValidator.validate(req.body);
+        const { error, value } = updateProfileValidator.validate({
+            ...value,
+            avatar: req.file?.filename
+        });
+        if (error) {
+            return res.status(422).json(error);
+        }
+
+        await UserModel.findByIdAndUpdate(req.auth.id, value);
+
         res.json('User profile updated');
-    
+
     } catch (error) {
         next(error)
-    }}
+    }
+}
