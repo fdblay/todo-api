@@ -87,6 +87,11 @@ export const getProfile = async (req, res, next) => {
 }
 
 export const userLogout = (req, res, next) => {
+    try {
+        
+    } catch (error) {
+        next(error);
+    }
     res.json('user Logged out');
 }
 
